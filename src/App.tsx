@@ -1,14 +1,16 @@
-import { RouterProvider } from "react-router";
-import "./App.css";
-import { router } from "./router";
+// App.tsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HomePage } from "./features/home/HomePage";
+import { OrganizationPage } from "./features/organization/OrganizationPage";
 
-function App() {
-
+export default function App() {
   return (
-    <>
-    <RouterProvider router={router} />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/:orgName" element={<OrganizationPage />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;
