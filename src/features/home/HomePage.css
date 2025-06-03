@@ -1,123 +1,417 @@
 /* HomePage.css */
 
+/* ---------------- Boje i fontovi ---------------- */
 :root {
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-background: #f3f4f6;
-  --color-text: #1f2937;
-  --color-card-bg: #ffffff;
-  --color-border: #e5e7eb;
-  --color-button-text: #ffffff;
-  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --color-bg-light: #f3f4f6;       /* svetla pozadina */
+  --color-gradient-start: #4f46e5; /* tamnoplava */
+  --color-gradient-end: #9333ea;   /* tamoljubičasta */
+  --color-card-bg: #ffffff;        /* bela kartica */
+  --color-text-dark: #1f2937;      /* tamno siva */
+  --color-text-light: #6b7280;     /* svetla siva */
+  --color-border: #e5e7eb;         /* svetla siva obruba */
+  --color-primary: #4f46e5;        /* plava za akcione dugmiće */
+  --color-primary-hover: #4338ca;  /* tamnija plava */
+  --color-overlay: rgba(0, 0, 0, 0.4);
+  --font-sans: "Inter", sans-serif;
 }
 
+/* ---------------- Osnovne postavke ---------------- */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: var(--font-family);
 }
-
 html,
 body {
-  background-color: var(--color-background);
-  color: var(--color-text);
   height: 100%;
   width: 100%;
+  background-color: var(--color-bg-light);
+  font-family: var(--font-sans);
 }
 
+/* ---------- 1) Home Container ---------- */
 .home-container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  padding: 40px 20px 20px 20px;
 }
 
+/* ---------- 2) Header / Wallet status ---------- */
 .wallet-status {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: var(--color-card-bg);
+  padding: 16px 32px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.wallet-button {
-  background-color: var(--color-primary);
-  color: var(--color-button-text);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+.connecting {
+  font-style: italic;
+  color: var(--color-text-light);
 }
 
-.wallet-button:hover {
-  background-color: var(--color-primary-hover);
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .wallet-address {
-  background-color: var(--color-card-bg);
-  border: 1px solid var(--color-border);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
   font-family: monospace;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.page-title {
-  font-size: 2rem;
-  margin-bottom: 40px;
-  color: var(--color-text);
-}
-
-.organization-section {
-  background-color: var(--color-card-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 24px;
-  max-width: 600px;
-  margin-top: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.organization-section h2 {
-  font-size: 1.5rem;
-  margin-bottom: 16px;
-  color: var(--color-text);
-}
-
-.organizations-list {
-  margin-bottom: 24px;
-}
-
-.org-placeholder {
-  font-size: 1rem;
-  color: #6b7280;
-}
-
-.create-button {
-  background-color: var(--color-primary);
-  color: var(--color-button-text);
-  border: none;
-  padding: 10px 20px;
+  background-color: #eef2ff;
+  color: var(--color-gradient-end);
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  border: 1px solid var(--color-gradient-start);
+  font-size: 0.9rem;
 }
 
-.create-button:hover {
+.wallet-balance {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+}
+
+.btn-signout {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.btn-signout:hover {
   background-color: var(--color-primary-hover);
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .organization-section {
-    padding: 16px;
-    margin: 0 10px;
-  }
+/* ---------- 3) Hero Section sa gradijentom i dekoracijom ---------- */
+.hero-section {
+  position: relative;
+  margin-top: -1px; /* da prekrije 1px senke header-a */
+  padding: 80px 20px 120px;
+  background: linear-gradient(
+    135deg,
+    var(--color-gradient-start),
+    var(--color-gradient-end)
+  );
+  color: white;
+  overflow: hidden;
+}
 
-  .page-title {
-    font-size: 1.75rem;
-    margin-bottom: 32px;
+.hero-overlay {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(50px);
+}
+
+.hero-content {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 32px;
+}
+
+.hero-cta {
+  background-color: #ffffff;
+  color: var(--color-gradient-start);
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.hero-cta:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+/* ---------- 4) Content Wrapper (lista organizacija) ---------- */
+.content-wrapper {
+  flex: 1;
+  max-width: 1000px;
+  width: 100%;
+  margin: -60px auto 40px; /* negativni margin da iskorači iznad hero sekcije */
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* ---------- 5) Header unutar sadržaja ---------- */
+.organizations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.organizations-header h2 {
+  font-size: 1.75rem;
+  color: var(--color-text-dark);
+}
+
+.small-create-btn {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.small-create-btn:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* ---------- 6) Lista i kartice organizacija ---------- */
+.organizations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+}
+
+.org-card {
+  background-color: var(--color-card-bg);
+  padding: 24px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.org-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.org-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+  fill: var(--color-gradient-start);
+}
+
+.org-name {
+  font-size: 1rem;
+  color: var(--color-text-dark);
+  word-break: break-word;
+}
+
+.org-placeholder {
+  font-style: italic;
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+/* ---------- 7) Modal za kreiranje nove organizacije ---------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background-color: var(--color-card-bg);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  padding: 40px 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.modal-header {
+  font-size: 1.5rem;
+  color: var(--color-text-dark);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.modal-label {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-top: 4px;
+  box-sizing: border-box;
+}
+
+.modal-add-member {
+  display: flex;
+  margin-top: 12px;
+}
+
+.modal-add-member input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px 0 0 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.modal-add-btn {
+  background-color: var(--color-gradient-end);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-add-btn:hover {
+  background-color: var(--color-gradient-start);
+}
+
+.modal-members-list {
+  list-style: disc inside;
+  margin: 16px 0;
+  padding-left: 20px;
+  max-height: 120px;
+  overflow-y: auto;
+  color: var(--color-text-dark);
+}
+
+.modal-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.modal-btn-cancel,
+.modal-btn-save {
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
+}
+
+.modal-btn-cancel {
+  background-color: #e5e7eb;
+  color: var(--color-text-dark);
+  border: none;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #d1d5db;
+}
+
+.modal-btn-save {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: none;
+}
+
+.modal-btn-save:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+}
+
+/* ---------- 8) Responsivna podešavanja ---------- */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+  .hero-cta {
+    padding: 10px 20px;
+  }
+  .content-wrapper {
+    margin: -40px auto 24px;
+    padding: 0 16px;
+  }
+  .org-card {
+    padding: 20px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+  .hero-cta {
+    font-size: 0.95rem;
+    padding: 8px 18px;
+  }
+  .organizations-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .small-create-btn {
+    margin-top: 12px;
+  }
+  .content-wrapper {
+    margin: -30px auto 20px;
+    padding: 0 12px;
+  }
+  .org-card {
+    padding: 18px 10px;
+  }
+  .modal-content {
+    padding: 28px 20px;
+  }
+  .modal-header {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  .modal-actions {
+    margin-top: 24px;
+    gap: 12px;
   }
 }
