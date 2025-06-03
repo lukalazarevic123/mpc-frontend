@@ -1,16 +1,10 @@
 // HomePage.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { UserButton, useUser } from "@civic/auth-web3/react";
+import { userHasWallet } from "@civic/auth-web3";
+import { useAccount, useConnect, useBalance, useDisconnect } from "wagmi";
 import "./HomePage.css";
-
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: { method: string }) => Promise<string[]>;
-      on: (event: string, callback: (accounts: string[]) => void) => void;
-    };
-  }
-}
 
 interface Organization {
   name: string;
@@ -18,15 +12,25 @@ interface Organization {
 }
 
 export function HomePage() {
-  const [account, setAccount] = useState<string | null>(null);
+  // ---------- 1) Civic Auth + Embedded Wallet Hooks ----------
+  const userContext = useUser();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+  const { address: embeddedAddress, isConnected: embeddedIsConnected } = useAccount();
+  const balanceResult = useBalance({
+    address: embeddedIsConnected ? embeddedAddress : undefined,
+  });
+
+  // ---------- 2) State za organizacije ----------
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>("");
   const [memberInput, setMemberInput] = useState<string>("");
   const [members, setMembers] = useState<string[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ---------- 3) Učitavanje / čuvanje organizacija iz localStorage ----------
   const loadOrganizations = useCallback(() => {
     const stored = localStorage.getItem("organizations");
     if (stored) {
@@ -55,43 +59,38 @@ export function HomePage() {
     localStorage.setItem("organizations", JSON.stringify(organizations));
   }, [organizations]);
 
+  // ---------- 4) Kada se korisnik prijavi u Civic Auth, odmah kreiramo i povežemo embedded wallet ----------
   useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum
-        .request({ method: "eth_accounts" })
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            setAccount(accounts[0]);
+    if (userContext.user && !embeddedIsConnected) {
+      (async () => {
+        // 4.1) Ako korisnik nema embedded wallet, kreiramo ga
+        if (!userHasWallet(userContext) && "createWallet" in userContext) {
+          try {
+            // @ts-ignore
+            await (userContext as any).createWallet();
+          } catch {
+            // Ako createWallet baci grešku (wallet već postoji), ignorisemo i nastavljamo
           }
-        });
-
-      window.ethereum.on("accountsChanged", (accounts: string[]) => {
-        if (accounts.length > 0) {
-          setAccount(accounts[0]);
-        } else {
-          setAccount(null);
         }
-      });
+        // 4.2) Wagmi connect
+        try {
+          await connect({ connector: connectors[0] });
+        } catch (e) {
+          console.error("Auto‐connect failed:", e);
+        }
+      })();
     }
-  }, []);
+  }, [userContext.user, embeddedIsConnected, connect, connectors]);
 
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("Molimo instalirajte MetaMask da biste se povezali.");
-      return;
+  // ---------- 5) Dugme za Sign Out (diskonektuje wallet i odjavljuje Civic Auth) ----------
+  const handleSignOut = async () => {
+    if (embeddedIsConnected) {
+      disconnect();
     }
-    try {
-      const accounts: string[] = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if (accounts.length > 0) {
-        setAccount(accounts[0]);
-      }
-    } catch (err) {
-      console.error("Greška pri povezivanju:", err);
-    }
+    await userContext.signOut();
   };
 
+  // ---------- 6) Funkcije za formu organizacija ----------
   const openForm = () => {
     setOrgName("");
     setMemberInput("");
@@ -129,19 +128,88 @@ export function HomePage() {
     navigate(`/${encodeURIComponent(name)}`);
   };
 
+  // ---------- 7) Debug log (opciono) ----------
+  useEffect(() => {
+    console.log("Civic userContext.user =", userContext.user);
+    console.log("Wagmi embeddedIsConnected =", embeddedIsConnected);
+    console.log("Wagmi embeddedAddress =", embeddedAddress);
+  }, [userContext.user, embeddedIsConnected, embeddedAddress]);
+
+  // ---------- 8) Render ----------
   return (
     <div className="home-container">
+      {/* ------ 8.1) Sekcija za wallet-status ------ */}
       <div className="wallet-status">
-        {account ? (
-          <span className="wallet-address">{account}</span>
-        ) : (
-          <button className="wallet-button" onClick={connectWallet}>
-            Connect Wallet
-          </button>
+        {/* Ako NIJE Civic Auth, prikazujemo UserButton */}
+        {!userContext.user && <UserButton />}
+
+        {/* 
+          Ako jeste Civic Auth (userContext.user) ali embedded wallet NIJE povezan,
+          prikazujemo poruku “Connecting…” dok se auto‐connect završava
+        */}
+        {userContext.user && !embeddedIsConnected && (
+          <span style={{ fontStyle: "italic", color: "#6b7280" }}>
+            Connecting…
+          </span>
+        )}
+
+        {/* Kada je embedded wallet povezan, prikazujemo adresu, balans i dugme Sign Out */}
+        {embeddedIsConnected && embeddedAddress && (
+          <div
+            className="wallet-info"
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            {/* Prikaz adrese */}
+            <span
+              className="wallet-address"
+              style={{
+                fontFamily: "monospace",
+                backgroundColor: "#eef2ff",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                border: "1px solid #4f46e5",
+              }}
+            >
+              {embeddedAddress}
+            </span>
+
+            {/* Prikaz balansa */}
+            {balanceResult.data && (
+              <span
+                style={{
+                  marginLeft: "12px",
+                  fontSize: "0.9rem",
+                  color: "#6b7280",
+                }}
+              >
+                {parseFloat(balanceResult.data.formatted).toFixed(4)}{" "}
+                {balanceResult.data.symbol}
+              </span>
+            )}
+
+            {/* Dugme Sign Out */}
+            <button
+              onClick={handleSignOut}
+              style={{
+                marginLeft: "12px",
+                backgroundColor: "#718096",
+                color: "#ffffff",
+                border: "none",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "0.9rem",
+              }}
+            >
+              Sign Out
+            </button>
+          </div>
         )}
       </div>
 
+      <h1 className="page-title">Home Page</h1>
 
+      {/* ------ 8.2) Sekcija za organizacije ------ */}
       <section className="organization-section">
         <h2>Organizations</h2>
         <div className="organizations-list">
@@ -153,17 +221,37 @@ export function HomePage() {
                 key={idx}
                 className="org-item"
                 onClick={() => handleOrgClick(org.name)}
+                style={{
+                  padding: "8px 12px",
+                  margin: "4px 0",
+                  borderRadius: "4px",
+                  backgroundColor: "#f3f4f6",
+                  cursor: "pointer",
+                }}
               >
                 {org.name}
               </div>
             ))
           )}
         </div>
-        <button className="create-button" onClick={openForm}>
+        <button
+          className="create-button"
+          onClick={openForm}
+          style={{
+            marginTop: "16px",
+            backgroundColor: "#4f46e5",
+            color: "#ffffff",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
           Create Your Organization
         </button>
       </section>
 
+      {/* ------ 8.3) Modal za kreiranje nove organizacije ------ */}
       {showForm && (
         <div
           style={{
@@ -189,9 +277,9 @@ export function HomePage() {
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             }}
           >
-            <h2 style={{ marginBottom: "16px" }}>New organization</h2>
+            <h2 style={{ marginBottom: "16px" }}>New Organization</h2>
             <label style={{ display: "block", marginBottom: "8px" }}>
-            Organization name
+              Organization Name
               <input
                 type="text"
                 value={orgName}
@@ -207,7 +295,7 @@ export function HomePage() {
             </label>
 
             <label style={{ display: "block", margin: "16px 0 8px 0" }}>
-              Add members
+              Add Members
               <div style={{ display: "flex", marginTop: "4px" }}>
                 <input
                   type="text"

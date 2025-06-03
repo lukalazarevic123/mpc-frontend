@@ -1,5 +1,7 @@
+// OrganizationPage.tsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 
 interface Organization {
   name: string;
@@ -9,31 +11,14 @@ interface Organization {
 export function OrganizationPage() {
   const { orgName } = useParams<{ orgName: string }>();
   const navigate = useNavigate();
+  const { address: account, isConnected } = useAccount();
 
-  const [account, setAccount] = useState<string | null>(null);
   const [org, setOrg] = useState<Organization | null>(null);
   const [signatures, setSignatures] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (window.ethereum) {
-      window.ethereum
-        .request({ method: "eth_accounts" })
-        .then((accounts: string[]) => {
-          if (accounts.length > 0) {
-            setAccount(accounts[0]);
-          }
-        })
-        .finally(() => {
-          loadOrgAndSignatures();
-        });
-
-      window.ethereum.on("accountsChanged", (accounts: string[]) => {
-        setAccount(accounts.length > 0 ? accounts[0] : null);
-      });
-    } else {
-      loadOrgAndSignatures();
-    }
+    loadOrgAndSignatures();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgName]);
 
@@ -43,6 +28,7 @@ export function OrganizationPage() {
       return;
     }
 
+    // Učitaj organizaciju iz localStorage
     const storedOrgs = localStorage.getItem("organizations");
     if (storedOrgs) {
       try {
@@ -56,6 +42,7 @@ export function OrganizationPage() {
       }
     }
 
+    // Učitaj potpise iz localStorage
     const key = `signatures_${decodeURIComponent(orgName)}`;
     const storedSigs = localStorage.getItem(key);
     if (storedSigs) {
@@ -209,24 +196,26 @@ export function OrganizationPage() {
         </p>
       </div>
 
-      {account && !signatures
-        .map((s) => s.toLowerCase())
-        .includes(account.toLowerCase()) && (
-        <button
-          onClick={handleSign}
-          style={{
-            marginTop: "16px",
-            backgroundColor: "#4f46e5",
-            color: "#ffffff",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: "6px",
-            cursor: "pointer",
-          }}
-        >
-          Sign
-        </button>
-      )}
+      {isConnected &&
+        account &&
+        !signatures
+          .map((s) => s.toLowerCase())
+          .includes(account.toLowerCase()) && (
+          <button
+            onClick={handleSign}
+            style={{
+              marginTop: "16px",
+              backgroundColor: "#4f46e5",
+              color: "#ffffff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            Sign
+          </button>
+        )}
     </div>
   );
 }
