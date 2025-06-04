@@ -3,7 +3,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { UserButton, useUser } from "@civic/auth-web3/react";
 import { userHasWallet } from "@civic/auth-web3";
-import { useAccount, useConnect, useBalance, useDisconnect } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useBalance,
+  useDisconnect,
+  useSignMessage,
+} from "wagmi";
 import "./HomePage.css";
 
 // Uvezi logo (pretpostavljamo da se nalazi u src/assets/logo.png)
@@ -26,6 +32,18 @@ export function HomePage() {
     address: embeddedIsConnected ? embeddedAddress : undefined,
   });
 
+  const { signMessageAsync } = useSignMessage({
+    mutation: {
+      onError: (error) => {
+        console.error("Signature request failed:", error);
+        toast.error("Signature request failed");
+      },
+      onSuccess: () => {
+        toast.success(`You have successfully joined a new organization`)
+      }
+    },
+  });
+
   // ---------- 2) Stealth adrese za animaciju u Hero ----------
   const stealthAddresses = [
     "0xAaBbCcDdEeFf0011223344556677889900AaBbCc",
@@ -43,10 +61,22 @@ export function HomePage() {
   const [members, setMembers] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const acceptInvitation = (organizationName: string) => {
+  const acceptInvitation = async (organizationName: string) => {
     console.log(`Invitation accepted for organization: ${organizationName}`);
-
-    fetchOrganizations();
+    try {
+      const messageToSign =
+        "Please sign this message to confirm your identity.";
+      // Wait for the signature to complete.
+      const signature = await signMessageAsync({
+        message: messageToSign,
+        account: embeddedAddress,
+      });
+      console.log("Signature received:", signature);
+      // Only after a successful signature do we fetch the organizations.
+      fetchOrganizations();
+    } catch (error) {
+      // Errors are already handled in onError.
+    }
   };
 
   const fetchOrganizations = async () => {
@@ -60,6 +90,7 @@ export function HomePage() {
           },
         }
       );
+
       if (response.ok) {
         const data = await response.json();
         if (!data) {
@@ -107,15 +138,15 @@ export function HomePage() {
                   justifyContent: "space-between",
                   padding: "0.5rem 1rem",
                   border: "1px solid #a24eea",
-                  borderRadius: "15px"
+                  borderRadius: "15px",
                 }}
               >
                 <span>{data.message}</span>
                 <button
-                className="btn-signout"
+                  className="btn-signout"
                   onClick={() => {
                     acceptInvitation(data.organization_name);
-                    toast.dismiss(toastId)
+                    toast.dismiss(toastId);
                   }}
                 >
                   Accept Invitation
