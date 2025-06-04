@@ -78,7 +78,7 @@ export function HomePage() {
 
     // Use a dedicated env for WebSocket URL or fallback to VITE_APP_BACKEND
     const wsUrl = `${
-      import.meta.env.VITE_APP_BACKEND_WS || import.meta.env.VITE_APP_BACKEND
+      import.meta.env.VITE_APP_BACKEND_WS
     }/ws/${embeddedAddress}`;
     const ws = new WebSocket(wsUrl);
 
