@@ -43,6 +43,12 @@ export function HomePage() {
   const [members, setMembers] = useState<string[]>([]);
   const navigate = useNavigate();
 
+  const acceptInvitation = (organizationName: string) => {
+    console.log(`Invitation accepted for organization: ${organizationName}`);
+
+    fetchOrganizations();
+  };
+
   const fetchOrganizations = async () => {
     if (!embeddedAddress) return;
     try {
@@ -92,7 +98,32 @@ export function HomePage() {
         const data = JSON.parse(event.data);
         // Assuming the backend sends an object with an OrganizationName and Message properties.
         if (data.organization_name && data.message) {
-          toast.success(data.message);
+          toast.custom(
+            (toastId) => (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.5rem 1rem",
+                  border: "1px solid #a24eea",
+                  borderRadius: "15px"
+                }}
+              >
+                <span>{data.message}</span>
+                <button
+                className="btn-signout"
+                  onClick={() => {
+                    acceptInvitation(data.organization_name);
+                    toast.dismiss(toastId)
+                  }}
+                >
+                  Accept Invitation
+                </button>
+              </div>
+            ),
+            { duration: 10000, dismissible: true }
+          );
         } else {
           console.log("WebSocket message received:", data);
         }
@@ -185,13 +216,6 @@ export function HomePage() {
     );
 
     if (req.ok) {
-      const exists = organizations.some((org) => org.name === nameTrimmed);
-      if (!exists) {
-        setOrganizations((prev) => [
-          ...prev,
-          { name: nameTrimmed, members: [...members] },
-        ]);
-      }
       closeForm();
     }
   };
