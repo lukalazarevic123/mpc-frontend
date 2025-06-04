@@ -60,7 +60,7 @@ export function HomePage() {
           setOrganizations([]);
         }
 
-        setOrganizations(data)
+        setOrganizations(data);
       } else {
         console.error("Failed to fetch organizations");
       }
@@ -71,6 +71,47 @@ export function HomePage() {
 
   useEffect(() => {
     fetchOrganizations();
+  }, [embeddedAddress]);
+
+  useEffect(() => {
+    if (!embeddedAddress) return;
+
+    // Use a dedicated env for WebSocket URL or fallback to VITE_APP_BACKEND
+    const wsUrl = `${
+      import.meta.env.VITE_APP_BACKEND_WS || import.meta.env.VITE_APP_BACKEND
+    }/ws/${embeddedAddress}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log("WebSocket connection opened at", wsUrl);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Assuming the backend sends an object with an OrganizationName and Message properties.
+        if (data.OrganizationName && data.Message) {
+          toast.success(data.Message);
+        } else {
+          console.log("WebSocket message received:", data);
+        }
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    // Clean up the connection when the component unmounts or embeddedAddress changes
+    return () => {
+      ws.close();
+    };
   }, [embeddedAddress]);
 
   // ---------- 5) Create + connect embedded wallet nakon Civic Auth ----------
@@ -109,7 +150,7 @@ export function HomePage() {
     setMembers(embeddedAddress ? [embeddedAddress] : []);
     setShowForm(true);
   };
-  
+
   const closeForm = () => setShowForm(false);
   const addMember = () => {
     const trimmed = memberInput.trim();
