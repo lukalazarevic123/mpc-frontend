@@ -6,6 +6,9 @@ import { userHasWallet } from "@civic/auth-web3";
 import { useAccount, useConnect, useBalance, useDisconnect } from "wagmi";
 import "./HomePage.css";
 
+// Uvezi logo (pretpostavljamo da se nalazi u src/assets/logo.png)
+import logo from "../../assets/CurvyMPC.png"; 
+
 interface Organization {
   name: string;
   members: string[];
@@ -21,7 +24,16 @@ export function HomePage() {
     address: embeddedIsConnected ? embeddedAddress : undefined,
   });
 
-  // ---------- 2) State za organizacije ----------
+  // ---------- 2) Stealth adrese za animaciju u Hero ----------
+  const stealthAddresses = [
+    "0xAaBbCcDdEeFf0011223344556677889900AaBbCc",
+    "0x11223344556677889900AaBbCcDdEeFf00112233",
+    "0x1234567890abcdef1234567890abcdef12345678",
+    "0xDeadBeefDeadBeefDeadBeefDeadBeefDeadBeef",
+    "0xFeedFaceFeedFaceFeedFaceFeedFaceFeedFace",
+  ];
+
+  // ---------- 3) State za organizacije ----------
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>("");
@@ -30,7 +42,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ---------- 3) Učitavanje / čuvanje organizacija iz localStorage ----------
+  // ---------- 4) Učitavanje / čuvanje organizacija iz localStorage ----------
   const loadOrganizations = useCallback(() => {
     const stored = localStorage.getItem("organizations");
     if (stored) {
@@ -46,23 +58,20 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Učitaj odmah kad HomePage mounta
     loadOrganizations();
   }, [loadOrganizations]);
 
   useEffect(() => {
-    // Svaki put kad se vratimo na "/", učitaj ponovno
     if (location.pathname === "/") {
       loadOrganizations();
     }
   }, [location.pathname, loadOrganizations]);
 
   useEffect(() => {
-    // Spremi u localStorage kad god se organizacije promijene
     localStorage.setItem("organizations", JSON.stringify(organizations));
   }, [organizations]);
 
-  // ---------- 4) Create + connect embedded wallet nakon Civic Auth ----------
+  // ---------- 5) Create + connect embedded wallet nakon Civic Auth ----------
   useEffect(() => {
     if (userContext.user && !embeddedIsConnected) {
       (async () => {
@@ -83,7 +92,7 @@ export function HomePage() {
     }
   }, [userContext.user, embeddedIsConnected, connect, connectors]);
 
-  // ---------- 5) Sign Out (diskonekcija + Civic signOut) ----------
+  // ---------- 6) Sign Out ----------
   const handleSignOut = async () => {
     if (embeddedIsConnected) {
       disconnect();
@@ -91,7 +100,7 @@ export function HomePage() {
     await userContext.signOut();
   };
 
-  // ---------- 6) Funkcije za formu organizacija ----------
+  // ---------- 7) Funkcije za formu organizacija ----------
   const openForm = () => {
     setOrgName("");
     setMemberInput("");
@@ -121,22 +130,27 @@ export function HomePage() {
   };
   const handleOrgClick = (name: string) => navigate(`/${encodeURIComponent(name)}`);
 
-  // ---------- 7) Debug log (opciono) ----------
+  // ---------- 8) Debug log (opciono) ----------
   useEffect(() => {
     console.log("Civic userContext.user =", userContext.user);
     console.log("Wagmi embeddedIsConnected =", embeddedIsConnected);
     console.log("Wagmi embeddedAddress =", embeddedAddress);
   }, [userContext.user, embeddedIsConnected, embeddedAddress]);
 
-  // ---------- 8) Render ----------
+  // ---------- 9) Render ----------
   return (
     <div className="home-container">
-      {/* ------ 8.1) Header / Wallet status ------ */}
+      {/* 9.1) Header / Wallet status */}
       <header className="wallet-status">
+        {/* Logo u gornjem lijevom kutu */}
+        <img src={logo} alt="Logo" className="logo" />
+
         {!userContext.user && <UserButton />}
+
         {userContext.user && !embeddedIsConnected && (
           <span className="connecting">Connecting…</span>
         )}
+
         {embeddedIsConnected && embeddedAddress && (
           <div className="wallet-info">
             <span className="wallet-address">{embeddedAddress}</span>
@@ -153,42 +167,8 @@ export function HomePage() {
         )}
       </header>
 
-      {/* ---------- 8.2) Hero / Intro sekcija sa laganim animiranim background‐om ---------- */}
+      {/* 9.2) Hero / Intro sekcija sa animiranim stealth adresama */}
       <section className="hero-section">
-        <div className="hero-overlay" />
-        <div className="hero-waves">
-          <svg
-            className="wave wave1"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 1440 240"
-          >
-            <path
-              fill="rgba(255,255,255,0.15)"
-              d="M0,192L48,202.7C96,213,192,235,288,234.7C384,235,480,213,576,197.3C672,181,768,171,864,181.3C960,192,1056,224,1152,240C1248,256,1344,256,1392,256L1440,256L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            ></path>
-          </svg>
-          <svg
-            className="wave wave2"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 1440 240"
-          >
-            <path
-              fill="rgba(255,255,255,0.10)"
-              d="M0,128L48,133.3C96,139,192,149,288,149.3C384,149,480,139,576,122.7C672,107,768,85,864,96C960,107,1056,149,1152,165.3C1248,181,1344,171,1392,165.3L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            ></path>
-          </svg>
-          <svg
-            className="wave wave3"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 1440 240"
-          >
-            <path
-              fill="rgba(255,255,255,0.05)"
-              d="M0,64L48,74.7C96,85,192,107,288,122.7C384,139,480,149,576,128C672,107,768,53,864,42.7C960,32,1056,64,1152,101.3C1248,139,1344,181,1392,202.7L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            ></path>
-          </svg>
-        </div>
-
         <div className="hero-content">
           <h1 className="hero-title">Welcome to MPC Dashboard</h1>
           <p className="hero-subtitle">
@@ -198,9 +178,27 @@ export function HomePage() {
             + Create Organization
           </button>
         </div>
+
+        {/* Animirane stealth adrese */}
+        {stealthAddresses.map((addr, idx) => {
+          const topPos = `${10 + Math.random() * 60}%`;
+          const delay = `${(Math.random() * 8).toFixed(2)}s`;
+          return (
+            <span
+              key={addr + idx}
+              className="stealth-item"
+              style={{
+                "--top": topPos,
+                "--delay": delay,
+              } as React.CSSProperties}
+            >
+              {addr}
+            </span>
+          );
+        })}
       </section>
 
-      {/* ---------- 8.3) Centrirani sadržaj (lista organizacija) ---------- */}
+      {/* 9.3) Centrirani sadržaj (lista organizacija) */}
       <main className="content-wrapper">
         <div className="organizations-header">
           <h2>Organizations</h2>
@@ -226,7 +224,7 @@ export function HomePage() {
         </div>
       </main>
 
-      {/* ---------- 8.4) Modal za kreiranje nove organizacije ---------- */}
+      {/* 9.4) Modal za kreiranje nove organizacije */}
       {showForm && (
         <div className="modal-overlay">
           <div className="modal-content">

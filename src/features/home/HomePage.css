@@ -5,17 +5,17 @@
 
 :root {
   /* Paleta osnovnih boja */
-  --color-bg-light-start: #f0f2f5;   /* Lagani svijetlo-sivi ton */
-  --color-bg-light-end: #d9dde3;     /* Tamniji sivi ton */
-  --color-gradient-start: #5b4bdb;   /* Blu-ljubičasta */
-  --color-gradient-end: #a24eea;     /* Svetlija ljubičasta */
-  --color-card-bg: #edeff2;          /* Nježni sivi ton umjesto čiste bijele */
-  --color-text-dark: #1e293b;        /* Tamno siva-plava za tekst */
-  --color-text-light: #64748b;       /* Srednje siva za podtekst */
-  --color-border: #cbd2d8;           /* Svjetlija siva za obrube */
-  --color-primary: #5b4bdb;          /* Gradient-start */
-  --color-primary-hover: #4a3db8;    /* Tamnija varijanta na hover */
-  --color-overlay: rgba(0, 0, 0, 0.5);/* Poluprozirna crna za modal */
+  --color-bg-light-start: #f0f2f5;
+  --color-bg-light-end: #d9dde3;
+  --color-gradient-start: #5b4bdb;
+  --color-gradient-end: #a24eea;
+  --color-card-bg: #edeff2;
+  --color-text-dark: #1e293b;
+  --color-text-light: #64748b;
+  --color-border: #cbd2d8;
+  --color-primary: #5b4bdb;
+  --color-primary-hover: #4a3db8;
+  --color-overlay: rgba(0, 0, 0, 0.5);
   --font-sans: "Inter", sans-serif;
   --transition-fast: 0.15s;
   --transition-normal: 0.3s;
@@ -31,7 +31,6 @@ html,
 body {
   height: 100%;
   width: 100%;
-  /* Zamijenjeno bijelo gradijentom */
   background: linear-gradient(
     135deg,
     var(--color-bg-light-start),
@@ -47,14 +46,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /* Ne stavljamo dodatnu pozadinu ovdje – sve je iz html/body */
 }
 
 /* ---------- 2) Header / Wallet status ---------- */
 .wallet-status {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
+  justify-content: space-between;
   background-color: var(--color-card-bg);
   padding: 16px 32px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -62,6 +60,13 @@ body {
   top: 0;
   z-index: 10;
   border-bottom: 1px solid var(--color-border);
+}
+
+/* Logo stil */
+.logo {
+  height: 80px;
+  width: auto;
+  cursor: pointer;
 }
 
 .connecting {
@@ -110,68 +115,57 @@ body {
   transform: translateY(-1px);
 }
 
-/* ---------- 3) Hero Section sa animiranim valovima ---------- */
+/* ---------- 3) Hero Section sa animiranim stealth adresama ---------- */
 .hero-section {
   position: relative;
-  margin-top: -1px; /* prekrije senku header-a */
-  padding: 120px 20px 180px;
+  margin-top: -1px;
+  padding: 220px 20px 180px;
   background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
   color: white;
   overflow: hidden;
 }
 
-.hero-overlay {
-  content: "";
+/* ---------- 3.1) Animirane stealth adrese u Hero (u pozadini) ---------- */
+.stealth-item {
   position: absolute;
-  top: -60px;
-  right: -80px;
-  width: 450px;
-  height: 450px;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 50%;
-  filter: blur(80px);
-  animation: float 7s ease-in-out infinite;
-  z-index: 1;
+  left: -250px;
+  top: var(--top, 20%);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  /* Siva, blijeda boja */
+  color: rgba(255, 255, 255, 0.25);
+  text-shadow: none;
+  animation: fly-stealth 10s linear infinite;
+  animation-delay: var(--delay, 0s);
+  z-index: 1; /* Ispod hero‐content koji će imati z-index 2 */
 }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(25px); }
-  100% { transform: translateY(0px); }
+@keyframes fly-stealth {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3; /* Blagi fade-in */
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(calc(100vw + 500px));
+    opacity: 0;
+  }
 }
 
-.hero-waves {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 160px;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.wave {
-  position: absolute;
-  width: 200%;
-  height: 100%;
-  animation: waveAnim 8s linear infinite;
-}
-
-.wave1 { bottom: 0; animation-delay: 0s; opacity: 0.25; }
-.wave2 { bottom: -10px; animation-delay: -2s; opacity: 0.4; }
-.wave3 { bottom: -20px; animation-delay: -4s; opacity: 0.6; }
-
-@keyframes waveAnim {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
+/* ---------- 4) Hero‐content (naslov i CTA) ---------- */
 .hero-content {
   position: relative;
+  z-index: 2; /* Iznad stealth adresa */
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
-  z-index: 3;
 }
 
 .hero-title {
@@ -209,19 +203,18 @@ body {
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
 }
 
-/* ---------- 4) Content Wrapper (lista organizacija) ---------- */
+/* ---------- 5) Content Wrapper (lista organizacija) ---------- */
 .content-wrapper {
   flex: 1;
   max-width: 1000px;
   width: 100%;
-  margin: -100px auto 60px; /* izlazi iznad hero sekcije */
+  margin: -100px auto 60px;
   padding: 0 24px;
   box-sizing: border-box;
-  /* Nema nikakve bijele pozadine – omogućava da se vidi gradijent iz html/body */
   background: transparent;
 }
 
-/* ---------- 5) Header unutar sadržaja ---------- */
+/* ---------- 6) Header unutar sadržaja ---------- */
 .organizations-header {
   display: flex;
   justify-content: space-between;
@@ -250,7 +243,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* ---------- 6) Lista i kartice organizacija ---------- */
+/* ---------- 7) Lista i kartice organizacija ---------- */
 .organizations-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -268,23 +261,6 @@ body {
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   overflow: hidden;
-}
-
-.org-card::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(91,75,219,0.08), transparent 70%);
-  transition: transform 0.6s ease;
-  transform: rotate(45deg) translate(-100%, -100%);
-  pointer-events: none;
-}
-
-.org-card:hover::before {
-  transform: rotate(45deg) translate(0, 0);
 }
 
 .org-card:hover {
@@ -309,7 +285,7 @@ body {
   font-size: 1rem;
 }
 
-/* ---------- 7) Modal za kreiranje nove organizacije ---------- */
+/* ---------- 8) Modal za kreiranje nove organizacije ---------- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -463,7 +439,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* ---------- 8) Responsivna podešavanja ---------- */
+/* ---------- 9) Responsivna podešavanja ---------- */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.8rem;
@@ -530,5 +506,10 @@ body {
   .modal-actions {
     margin-top: 32px;
     gap: 16px;
+  }
+  .modal-btn-cancel,
+  .modal-btn-save {
+    padding: 14px 24px;
+    font-size: 0.9rem;
   }
 }
