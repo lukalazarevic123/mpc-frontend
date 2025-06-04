@@ -1,0 +1,515 @@
+/* HomePage.css */
+
+/* ---------------- Boje i fontovi ---------------- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+:root {
+  /* Paleta osnovnih boja */
+  --color-bg-light-start: #f0f2f5;
+  --color-bg-light-end: #d9dde3;
+  --color-gradient-start: #5b4bdb;
+  --color-gradient-end: #a24eea;
+  --color-card-bg: #edeff2;
+  --color-text-dark: #1e293b;
+  --color-text-light: #64748b;
+  --color-border: #cbd2d8;
+  --color-primary: #5b4bdb;
+  --color-primary-hover: #4a3db8;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+  --font-sans: "Inter", sans-serif;
+  --transition-fast: 0.15s;
+  --transition-normal: 0.3s;
+}
+
+/* ---------- Reset + osnovno ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-bg-light-start),
+    var(--color-bg-light-end)
+  );
+  font-family: var(--font-sans);
+  color: var(--color-text-dark);
+  scroll-behavior: smooth;
+}
+
+/* ---------- 1) Home Container ---------- */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- 2) Header / Wallet status ---------- */
+.wallet-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-card-bg);
+  padding: 16px 32px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Logo stil */
+.logo {
+  height: 80px;
+  width: auto;
+  cursor: pointer;
+}
+
+.connecting {
+  font-style: italic;
+  color: var(--color-text-light);
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.wallet-address {
+  font-family: monospace;
+  background-color: #e8ecf3;
+  color: var(--color-gradient-end);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-gradient-start);
+  font-size: 0.9rem;
+  transition: background-color var(--transition-fast);
+}
+.wallet-address:hover {
+  background-color: #dfe4f2;
+}
+
+.wallet-balance {
+  color: var(--color-text-light);
+  font-size: 0.85rem;
+}
+
+.btn-signout {
+  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.btn-signout:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ---------- 3) Hero Section sa animiranim stealth adresama ---------- */
+.hero-section {
+  position: relative;
+  margin-top: -1px;
+  padding: 220px 20px 180px;
+  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+  color: white;
+  overflow: hidden;
+}
+
+/* ---------- 3.1) Animirane stealth adrese u Hero (u pozadini) ---------- */
+.stealth-item {
+  position: absolute;
+  left: -250px;
+  top: var(--top, 20%);
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  /* Siva, blijeda boja */
+  color: rgba(255, 255, 255, 0.25);
+  text-shadow: none;
+  animation: fly-stealth 10s linear infinite;
+  animation-delay: var(--delay, 0s);
+  z-index: 1; /* Ispod hero‐content koji će imati z-index 2 */
+}
+
+@keyframes fly-stealth {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3; /* Blagi fade-in */
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(calc(100vw + 500px));
+    opacity: 0;
+  }
+}
+
+/* ---------- 4) Hero‐content (naslov i CTA) ---------- */
+.hero-content {
+  position: relative;
+  z-index: 2; /* Iznad stealth adresa */
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 48px;
+  line-height: 1.5;
+}
+
+.hero-cta {
+  background: linear-gradient(135deg, #ffffff 0%, #e5e7eb 100%);
+  color: var(--color-gradient-start);
+  border: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 16px 32px;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+.hero-cta:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- 5) Content Wrapper (lista organizacija) ---------- */
+.content-wrapper {
+  flex: 1;
+  max-width: 1000px;
+  width: 100%;
+  margin: -100px auto 60px;
+  padding: 0 24px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* ---------- 6) Header unutar sadržaja ---------- */
+.organizations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.organizations-header h2 {
+  font-size: 2rem;
+  color: var(--color-text-dark);
+}
+
+.small-create-btn {
+  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.small-create-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+/* ---------- 7) Lista i kartice organizacija ---------- */
+.organizations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+.org-card {
+  background-color: var(--color-card-bg);
+  padding: 32px 24px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  text-align: center;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.org-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.org-name {
+  font-size: 1.2rem;
+  color: var(--color-text-dark);
+  word-break: break-word;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Ako nema organizacija */
+.org-placeholder {
+  font-style: italic;
+  color: var(--color-text-light);
+  text-align: center;
+  padding: 60px 0;
+  font-size: 1rem;
+}
+
+/* ---------- 8) Modal za kreiranje nove organizacije ---------- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background-color: var(--color-card-bg);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  padding: 56px 48px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  position: relative;
+  transform: translateY(-20px);
+  animation: slideIn 0.3s forwards;
+}
+
+@keyframes slideIn {
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  font-size: 1.8rem;
+  color: var(--color-text-dark);
+  margin-bottom: 32px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.modal-label {
+  display: block;
+  font-size: 1rem;
+  color: var(--color-text-dark);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 8px;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.modal-input:focus {
+  border-color: var(--color-gradient-start);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(91, 75, 219, 0.2);
+}
+
+.modal-add-member {
+  display: flex;
+  margin-top: 16px;
+}
+
+.modal-add-member input {
+  flex: 1;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px 0 0 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.modal-add-member input:focus {
+  border-color: var(--color-gradient-start);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(91, 75, 219, 0.2);
+}
+
+.modal-add-btn {
+  background: linear-gradient(135deg, var(--color-gradient-end), var(--color-gradient-start));
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+.modal-add-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.modal-members-list {
+  list-style: disc inside;
+  margin: 20px 0;
+  padding-left: 24px;
+  max-height: 160px;
+  overflow-y: auto;
+  color: var(--color-text-dark);
+  font-size: 0.95rem;
+}
+
+.modal-actions {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.modal-btn-cancel,
+.modal-btn-save {
+  padding: 16px 28px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.modal-btn-cancel {
+  background-color: #e5e7eb;
+  color: var(--color-text-dark);
+  border: none;
+}
+.modal-btn-cancel:hover {
+  background-color: #d1d5db;
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.modal-btn-save {
+  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+  color: #ffffff;
+  border: none;
+}
+.modal-btn-save:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+/* ---------- 9) Responsivna podešavanja ---------- */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.8rem;
+  }
+  .hero-subtitle {
+    font-size: 1.15rem;
+    margin-bottom: 32px;
+  }
+  .hero-cta {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+  .content-wrapper {
+    margin: -80px auto 40px;
+    padding: 0 20px;
+  }
+  .org-card {
+    padding: 28px 20px;
+  }
+  .modal-content {
+    padding: 48px 36px;
+  }
+  .modal-header {
+    font-size: 1.6rem;
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2.4rem;
+  }
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+  .hero-cta {
+    font-size: 0.95rem;
+    padding: 12px 24px;
+  }
+  .organizations-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .small-create-btn {
+    margin-top: 12px;
+    width: 100%;
+    text-align: center;
+  }
+  .content-wrapper {
+    margin: -60px auto 20px;
+    padding: 0 16px;
+  }
+  .org-card {
+    padding: 24px 16px;
+  }
+  .modal-content {
+    padding: 36px 28px;
+  }
+  .modal-header {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+  }
+  .modal-actions {
+    margin-top: 32px;
+    gap: 16px;
+  }
+  .modal-btn-cancel,
+  .modal-btn-save {
+    padding: 14px 24px;
+    font-size: 0.9rem;
+  }
+}
