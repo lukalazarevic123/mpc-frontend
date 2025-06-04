@@ -207,7 +207,7 @@ export function OrganizationPage() {
                 </button>
               </div>
             ),
-            { duration: 10000, dismissible: true }
+            { duration: 100000, dismissible: true }
           );
         }
       } catch (err) {
