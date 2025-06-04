@@ -7,7 +7,8 @@ import { useAccount, useConnect, useBalance, useDisconnect } from "wagmi";
 import "./HomePage.css";
 
 // Uvezi logo (pretpostavljamo da se nalazi u src/assets/logo.png)
-import logo from "../../assets/CurvyMPC.png"; 
+import logo from "../../assets/CurvyMPC.png";
+import { toast } from "sonner";
 
 interface Organization {
   name: string;
@@ -19,7 +20,8 @@ export function HomePage() {
   const userContext = useUser();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
-  const { address: embeddedAddress, isConnected: embeddedIsConnected } = useAccount();
+  const { address: embeddedAddress, isConnected: embeddedIsConnected } =
+    useAccount();
   const balanceResult = useBalance({
     address: embeddedIsConnected ? embeddedAddress : undefined,
   });
@@ -40,36 +42,36 @@ export function HomePage() {
   const [memberInput, setMemberInput] = useState<string>("");
   const [members, setMembers] = useState<string[]>([]);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // ---------- 4) Učitavanje / čuvanje organizacija iz localStorage ----------
-  const loadOrganizations = useCallback(() => {
-    const stored = localStorage.getItem("organizations");
-    if (stored) {
-      try {
-        const parsed: Organization[] = JSON.parse(stored);
-        setOrganizations(parsed);
-      } catch {
-        setOrganizations([]);
+  const fetchOrganizations = async () => {
+    if (!embeddedAddress) return;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_BACKEND}/organizations/${embeddedAddress}`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (!data) {
+          setOrganizations([]);
+        }
+
+        setOrganizations(data)
+      } else {
+        console.error("Failed to fetch organizations");
       }
-    } else {
-      setOrganizations([]);
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    loadOrganizations();
-  }, [loadOrganizations]);
-
-  useEffect(() => {
-    if (location.pathname === "/") {
-      loadOrganizations();
-    }
-  }, [location.pathname, loadOrganizations]);
-
-  useEffect(() => {
-    localStorage.setItem("organizations", JSON.stringify(organizations));
-  }, [organizations]);
+    fetchOrganizations();
+  }, [embeddedAddress]);
 
   // ---------- 5) Create + connect embedded wallet nakon Civic Auth ----------
   useEffect(() => {
@@ -104,9 +106,10 @@ export function HomePage() {
   const openForm = () => {
     setOrgName("");
     setMemberInput("");
-    setMembers([]);
+    setMembers(embeddedAddress ? [embeddedAddress] : []);
     setShowForm(true);
   };
+  
   const closeForm = () => setShowForm(false);
   const addMember = () => {
     const trimmed = memberInput.trim();
@@ -115,9 +118,31 @@ export function HomePage() {
     }
     setMemberInput("");
   };
-  const submitOrganization = () => {
+
+  const submitOrganization = async () => {
     const nameTrimmed = orgName.trim();
-    if (nameTrimmed) {
+    if (!nameTrimmed) {
+      toast.error("Something went wrong");
+      return;
+    }
+
+    const formattedMembers = members.map((address) => ({ address }));
+
+    const createOrgReq = {
+      name: nameTrimmed,
+      threshold: formattedMembers.length,
+      participants: formattedMembers,
+    };
+
+    const req = await fetch(
+      `${import.meta.env.VITE_APP_BACKEND}/organizations`,
+      {
+        method: "POST",
+        body: JSON.stringify(createOrgReq),
+      }
+    );
+
+    if (req.ok) {
       const exists = organizations.some((org) => org.name === nameTrimmed);
       if (!exists) {
         setOrganizations((prev) => [
@@ -128,7 +153,9 @@ export function HomePage() {
       closeForm();
     }
   };
-  const handleOrgClick = (name: string) => navigate(`/${encodeURIComponent(name)}`);
+
+  const handleOrgClick = (name: string) =>
+    navigate(`/${encodeURIComponent(name)}`);
 
   // ---------- 8) Debug log (opciono) ----------
   useEffect(() => {
@@ -172,7 +199,8 @@ export function HomePage() {
         <div className="hero-content">
           <h1 className="hero-title">Welcome to MPC Dashboard</h1>
           <p className="hero-subtitle">
-            Manage your multi‐party organizations and collect signatures seamlessly.
+            Manage your multi‐party organizations and collect signatures
+            seamlessly.
           </p>
           <button className="hero-cta" onClick={openForm}>
             + Create Organization
@@ -187,10 +215,12 @@ export function HomePage() {
             <span
               key={addr + idx}
               className="stealth-item"
-              style={{
-                "--top": topPos,
-                "--delay": delay,
-              } as React.CSSProperties}
+              style={
+                {
+                  "--top": topPos,
+                  "--delay": delay,
+                } as React.CSSProperties
+              }
             >
               {addr}
             </span>
