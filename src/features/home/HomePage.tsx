@@ -58,6 +58,7 @@ export function HomePage() {
         const data = await response.json();
         if (!data) {
           setOrganizations([]);
+          return;
         }
 
         setOrganizations(data);
