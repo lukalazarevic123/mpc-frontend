@@ -91,8 +91,8 @@ export function HomePage() {
       try {
         const data = JSON.parse(event.data);
         // Assuming the backend sends an object with an OrganizationName and Message properties.
-        if (data.OrganizationName && data.Message) {
-          toast.success(data.Message);
+        if (data.organization_name && data.message) {
+          toast.success(data.message);
         } else {
           console.log("WebSocket message received:", data);
         }
