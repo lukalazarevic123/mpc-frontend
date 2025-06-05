@@ -34,7 +34,7 @@ export function OrganizationPage() {
 
   // Za demo: hardkodirane stealth adrese
   const [stealthAddresses] = useState<`0x${string}`[]>([
-    "0x1234567890abcdef1234567890abcdef12345678" as `0x${string}`,
+    "0x1617C22D68C7f2E2ABC433f7ba4F67C952905989" as `0x${string}`,
   ]);
 
   // UI stanja
@@ -161,27 +161,19 @@ export function OrganizationPage() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log(data)
+        console.log(data);
         if (data.update) {
-          // For simplicity, show a toast or update a state that displays the current confirmation progress.
           toast(data.update);
-          // You could also set a state variable:
           setTxRequests((prevRequests) => {
-            // If you have one pending transaction, update its progress.
-            // Otherwise, you might need to map by id.
             return prevRequests.map((tx) => ({
               ...tx,
-              // parse the update string to get confirmations, or have the backend send those as numbers.
-              // For example, if backend sends: { confirmations: X, threshold: Y }
-              // then update tx.signatures.length or add a new property.
               confirmations: data.confirmations || tx.signatures.length,
             }));
           });
         }
 
-        if (data.message.includes("initiated")) {
+        if (data.message && data.message.includes("initiated")) {
           // Display a notification when a message is received.
-          // Adjust the UI or message format as needed.
           toast.custom(
             (toastId) => (
               <div
@@ -209,6 +201,10 @@ export function OrganizationPage() {
             ),
             { duration: 100000, dismissible: true }
           );
+        }
+
+        if (data.message && data.message.toLowerCase().includes("confirmed")) {
+          toast.success("Transaction fully confirmed!");
         }
       } catch (err) {
         console.error("Error parsing organization WS message:", err);

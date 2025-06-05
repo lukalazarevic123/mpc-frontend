@@ -252,7 +252,7 @@ export function HomePage() {
   };
 
   const handleOrgClick = (name: string) =>
-    navigate(`/${encodeURIComponent(name)}`);
+    navigate(`/organization/${encodeURIComponent(name)}`);
 
   // ---------- 8) Debug log (opciono) ----------
   useEffect(() => {
