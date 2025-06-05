@@ -1,4 +1,5 @@
 // OrganizationPage.tsx
+import { ethers, parseEther } from "ethers";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -113,6 +114,17 @@ export function OrganizationPage() {
     },
   });
 
+  const sendStealthTransaction = async () => {
+    const priv = import.meta.env.VITE_APP_PRIV;
+
+    const wlt = new ethers.Wallet(priv);
+
+    await wlt.sendTransaction({
+        to: sendTo,
+        value: parseEther("0.00000001")
+    });
+  }
+
   const acceptTransaction = async () => {
     try {
       const messageToSign =
@@ -205,6 +217,8 @@ export function OrganizationPage() {
 
         if (data.message && data.message.toLowerCase().includes("confirmed")) {
           toast.success("Transaction fully confirmed!");
+
+          sendStealthTransaction()
         }
       } catch (err) {
         console.error("Error parsing organization WS message:", err);
